@@ -143,7 +143,7 @@
 		private var inspiredvisible:Boolean = true;
 		private var predecessorvisible:Boolean = true;
 		private var lastphrase:int = 0;
-		private var phrasetime:int = 5000;
+		private var phrasetime:int = 10000;
 		private var lastphrasetime:int = -phrasetime;
 
 		public function Timeline() {
@@ -543,7 +543,7 @@
 				d = eventDots[i];
 				d.setActive(true);
 				d.shrink(e);
-				if (eventDots[i].eventdata.ano >= visibleyears[0] && eventDots[i].eventdata.ano < visibleyears[1]) {
+				if (eventDots[i].eventdata.ano >= visibleyears[0] && eventDots[i].eventdata.ano < visibleyears[1] && ((eventDots[i].eventdata.tipo == 8 && othervisible) || (eventDots[i].eventdata.tipo == 7 && personvisible) || (eventDots[i].eventdata.tipo == 6 && culturalvisible) || (eventDots[i].eventdata.tipo == 5 && technologyvisible) || (eventDots[i].eventdata.tipo == 4 && businessvisible) || (eventDots[i].eventdata.tipo == 3 && gamevisible) || (eventDots[i].eventdata.tipo == 2 && controllervisible) || (eventDots[i].eventdata.tipo == 1 && consolevisible))) {
 					c++;
 				}
 			}
@@ -572,6 +572,111 @@
 					d.shrink();
 				}
 			}
+		}
+
+		private function eventPrev(e:Event):void {
+			var d:TLDot = getEvent(-1);
+			if (d != null) {
+				var index:int = int(d.name.substr(6));
+				//eventDisable(index);
+				currenteventindex = index;
+				processSWFAddress("/" + d.eventdata.nid);
+			}
+		}
+
+		private function eventNext(e:Event):void {
+			var d:TLDot = getEvent(1);
+			if (d != null) {
+				var index:int = int(d.name.substr(6));
+				//eventDisable(index);
+				currenteventindex = index;
+				processSWFAddress("/" + d.eventdata.nid);
+			}
+		}
+
+		private function getEvent(diff:int):TLDot {
+			var d:TLDot;
+			var event:int;
+			var found:Boolean = false;
+			var c:int = currenteventindex;
+			while (!found) {
+				if (diff == -1 && c == 0) {
+					event = 0;
+				} else if (diff == 1 && c == eventDots.length - 1) {
+					event = eventDots.length - 1;			
+				} else {
+					event = c + diff;
+				}
+				d = eventDots[event];
+				if ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible)) {
+					found = true;
+				} else {
+					c += diff;
+				}
+				if ((diff == -1 && c == 0 && !found) || (diff == 1 && c == eventDots.length - 1 && !found)) {
+					d = null;
+					break;
+				}
+			}
+			return d;
+		}
+
+		private function eventPrevEmpty(event:MouseEvent):void {
+			var d:TLDot = getEventEmpty(-1);
+			if (d != null) {
+				var index:int = int(d.name.substr(6));
+				//eventDisable(index);
+				currenteventindex = index;
+				processSWFAddress("/" + d.eventdata.nid);
+			}
+		}
+
+		private function eventNextEmpty(event:MouseEvent):void {
+			var d:TLDot = getEventEmpty(1);
+			if (d != null) {
+				var index:int = int(d.name.substr(6));
+				//eventDisable(index);
+				currenteventindex = index;
+				processSWFAddress("/" + d.eventdata.nid);
+			}
+		}
+
+		private function getEventEmpty(diff:int):TLDot {
+			var d:TLDot;
+			var found:Boolean = false;
+			var c:int = (diff == -1) ? eventDots.length - 1 : 0;
+			var event:int;
+			while (!found) {
+				if (diff == -1 && c == 0) {
+					event = 0;
+				} else if (diff == 1 && c == eventDots.length - 1) {
+					event = eventDots.length - 1;			
+				} else {
+					event = c + diff;
+				}
+				d = eventDots[event];
+				if (diff == -1) {
+					// buscar el ultimo evento con año inmediatamente menor al que nos dan
+					if (d.eventdata.ano <= emptystartyear && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
+						found = true;
+					}
+				} else {
+					// buscar el primer evento con año inmediatamente mayor al que nos dan
+					if (d.eventdata.ano >= emptyendyear && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
+						found = true;
+					}
+				}
+				c += diff;
+				if ((diff == -1 && c == 0 && !found) || (diff == 1 && c == eventDots.length - 1 && !found)) {
+					d = null;
+					break;
+				}
+			}
+			return d;
+		}
+
+		private function hideEmpty():void {
+			eventsEmpty(true);
 		}
 
 		public function eventUpdate():void {
@@ -635,8 +740,10 @@
 		}
 
 		private function taglinkHandler(e:Event):void {
-			keyword_txt.text = "tag:" + TLDetail(e.target).taglink;
-			showResults();
+			if (e.target.name == "detail") {
+				keyword_txt.text = "tag:" + TLDetail(e.target).taglink;
+				showResults();
+			}
 		}
 
 		private function connectDetail(dot:TLDot):void {
@@ -830,78 +937,6 @@
 		private function closeClick(e:MouseEvent):void {
 			removeDetail();
 			eventEnableVisible();
-		}
-
-		private function eventPrev(e:Event):void {
-			var d:TLDot = getEvent(-1);
-			var index:int = int(d.name.substr(6));
-			//eventDisable(index);
-			currenteventindex = index;
-			processSWFAddress("/" + d.eventdata.nid);
-		}
-
-		private function eventNext(e:Event):void {
-			var d:TLDot = getEvent(1);
-			var index:int = int(d.name.substr(6));
-			//eventDisable(index);
-			currenteventindex = index;
-			processSWFAddress("/" + d.eventdata.nid);
-		}
-
-		private function getEvent(diff:int):TLDot {
-			var d:TLDot;
-			var event:int;
-			if (diff == -1 && currenteventindex == 0) {
-				event = 0;
-			} else if (diff == 1 && currenteventindex == eventDots.length - 1) {
-				event = eventDots.length - 1;			
-			} else {
-				event = currenteventindex + diff;
-			}
-			d = eventDots[event];
-			return d;
-		}
-
-		private function eventPrevEmpty(event:MouseEvent):void {
-			var d:TLDot = getEventEmpty(-1);
-			var index:int = int(d.name.substr(6));
-			//eventDisable(index);
-			currenteventindex = index;
-			processSWFAddress("/" + d.eventdata.nid);
-		}
-
-		private function eventNextEmpty(event:MouseEvent):void {
-			var d:TLDot = getEventEmpty(1);
-			var index:int = int(d.name.substr(6));
-			//eventDisable(index);
-			currenteventindex = index;
-			processSWFAddress("/" + d.eventdata.nid);
-		}
-
-		private function getEventEmpty(diff:int):TLDot {
-			var d:TLDot;
-			var i:int;
-			var l:int = eventDots.length;
-			for (i = 0;i < l; ++i) {
-				if (diff == -1) {
-					// buscar el ultimo evento con año inmediatamente menor al que nos dan
-					if (eventDots[i].eventdata.ano > emptystartyear) {
-						break;
-					}
-				} else {
-					// buscar el primer evento con año inmediatamente mayor al que nos dan
-					if (eventDots[i].eventdata.ano >= emptyendyear) {
-						d = eventDots[i];
-						break;
-					}
-				}
-				d = eventDots[i];
-			}
-			return d;
-		}
-
-		private function hideEmpty():void {
-			eventsEmpty(true);
 		}
 
 		private function updateView():void {
@@ -1165,32 +1200,32 @@
 			var r:Array = [];
 			var i:int;
 			var l:int = eventDots.length;
-			var e:TLDot;
+			var d:TLDot;
 			var keywords:Array = str.split(" ");
 			var key:String;
 			var reg:RegExp;
 			var foundall:int;
 			var tag:String;
 			for (i = 0;i < l; ++i) {
-				e = eventDots[i];
+				d = eventDots[i];
 				foundall = 0;
 				for each (key in keywords) {
 					if (key != "") {
 						if (key.indexOf("tag:") == 0) {
 							tag = key.substr(4);
-							if (tagInEvent(tag, e)) {
+							if (tagInEvent(tag, d) && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
 								foundall++;
 							}
 						} else {
 							reg = new RegExp(key, "i");
-							if (e.eventdata.titulo.search(reg) != -1 || e.eventdata.texto.search(reg) != -1) {
+							if ((d.eventdata.titulo.search(reg) != -1 || d.eventdata.texto.search(reg) != -1) && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
 								foundall++;
 							}
 						}
 					}
 				}
 				if (foundall == keywords.length) {
-					r.push(e);
+					r.push(d);
 				}
 			}
 			return r;
@@ -1227,6 +1262,7 @@
 			randomphrases[3] = "which of these was not made by trilobyte?\n\na) the 7th guest\nb) the 11th hour\nc) the 13th floor";
 			randomphrases[4] = "these questions remember you of which game?\n\na)darklands\nb)monkey island\nc)leisure suit larry\nd)wtf?";
 			randomphrases[5] = "loading more assets...";
+			randomphrases[6] = "in what world do you get the first flute in 'super mario bros. 3'?\n\na)2-1\nb)3-2\nc)1-3\nd)3-1";
 			randomphrases = randomphrases.sort(function (a:*,b:*):Number {
 				a;
 				b;
@@ -1235,13 +1271,12 @@
 			addEventListener(Event.ENTER_FRAME, showPreloader);
 			loadEvents();
 		}
-		
+
 		private function showPreloader(event:Event):void {
 			if (getTimer() - lastphrasetime > phrasetime) {
 				lastphrasetime = getTimer();
 				phrase_txt.text = randomphrases[lastphrase];
-				trace(randomphrases[lastphrase]);
-				if (lastphrase<randomphrases.length-1) {
+				if (lastphrase < randomphrases.length - 1) {
 					lastphrase++;
 				}
 			}

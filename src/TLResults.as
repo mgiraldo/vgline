@@ -51,7 +51,7 @@ package {
 			} else if (l==1) {
 				texthtml = "<p class='text'>1 result found for '" + str + "'</p>";
 			} else {
-				texthtml = "<p class='text'>No results found for '" + str + "'</p>";
+				texthtml = "<p class='text'>No results found for '" + str + "'. Try removing filters.</p>";
 			}
 			
 			var ss:StyleSheet = new StyleSheet();

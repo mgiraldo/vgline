@@ -11,6 +11,12 @@
 	 * @author Mauricio Giraldo Arteaga <http://www.mauriciogiraldo.com/> 
 	 */
 	// externals
+	import flash.utils.getTimer;
+
+	import com.adobe.utils.StringUtil;
+
+	import flash.events.FocusEvent;
+	import flash.ui.Keyboard;
 	import flash.display.StageQuality;
 	import flash.events.KeyboardEvent;
 	import flash.display.StageAlign;
@@ -47,17 +53,17 @@
 		private const dotxdif:int = 15;
 		private const dotydif:int = 60;
 		private const monthydif:int = 12;
-		private const detailx:int = 243;
-		private const detaily:int = 80;
+		private const detailx:int = 200;
+		private const detaily:int = 100;
 		private const connectorx:int = -2;
 		private const connectory:int = -4;
 		private const xdotdetail:int = detailx - 45;
-		private const resultsx:int = 121;
-		private const resultsy:int = 80;
+		private const resultsx:int = 768;
+		private const resultsy:int = 26;
 		private const bcyearname:String = "BC";
 		private const relationxfin:int = 117;
 		private const relationyfin:int = 13;
-		// colores
+		private const monthspermark:int = 1;
 		private const eventcolors:/*String*/Array = ["",
 			"#ffcc00", //1|Console
 			"#00ffff", //2|Controller
@@ -68,8 +74,7 @@
 			"#ff0000", //7|Person
 			"#cccccc"//8|Other
 		];
-		// constantes pepas
-		private const monthspermark:int = 1;
+		private var randomphrases:Array;
 		// clips a ser manipulados y vars relacionadas
 		private var detail:TLDetail;
 		public var timelineClip:MovieClip;
@@ -96,6 +101,7 @@
 		private var maxyear:int = 2020;
 		private var deltayears:int = maxyear - minyear;
 		private const oneyearfullwidth:int = 186;
+		private const panjump:int = Math.round(oneyearfullwidth * 0.5);
 		private var timelineevents:Array;
 		private var timelineepochs:Array;
 		private var currenteventindex:int;
@@ -122,6 +128,7 @@
 		public var related_mc:MovieClip;
 		public var inspired_mc:MovieClip;
 		public var predecessor_mc:MovieClip;
+		public var phrase_txt:TextField;
 		// teclado
 		private var spacepressed:Boolean = false;
 		private var personvisible:Boolean = true;
@@ -135,6 +142,9 @@
 		private var relatedvisible:Boolean = true;
 		private var inspiredvisible:Boolean = true;
 		private var predecessorvisible:Boolean = true;
+		private var lastphrase:int = 0;
+		private var phrasetime:int = 5000;
+		private var lastphrasetime:int = -phrasetime;
 
 		public function Timeline() {
 			init();
@@ -364,6 +374,8 @@
 					if (businessvisible && gamevisible && inspiredvisible) drawRelations(d, 4, d.eventdata.inspired);
 					// juegos con juegos relacionados
 					if (gamevisible && relatedvisible) drawRelations(d, 3, d.eventdata.related, "related");
+					// juegos con consolas relacionadas
+					if (gamevisible && consolevisible && relatedvisible) drawRelations(d, 1, d.eventdata.related, "related");
 				} else if (d.eventdata.tipo == 4) {
 					// Business
 					// negocios con sus fundadores
@@ -395,7 +407,7 @@
 			var i:int;
 			var l:int = relationsClip.numChildren;
 			if (l > 0) {
-				for (i = l-1;i >= 0; --i) {
+				for (i = l - 1;i >= 0; --i) {
 					relationsClip.removeChildAt(i);
 				}
 			}
@@ -422,27 +434,27 @@
 						relxy = to.localToGlobal(new Point(relationxfin, relationyfin));
 						start = relationsClip.globalToLocal(dotxy);
 						end = relationsClip.globalToLocal(relxy);
-						ydif = (start.y < end.y) ? Math.round((end.y - start.y) / 3) : Math.round((end.y - start.y) / 4);
+						ydif = (start.y < end.y) ? Math.round((end.y - start.y) * .33) : Math.round((end.y - start.y) * .25);
 						decade = parseInt(String(from.eventdata.ano).substr(2, 2));
 						if (Math.abs(start.y - end.y) == relationyfin) {
 							// están al mismo y
-							ydif += dotydif / 5 + Math.round(decade / 8);
+							ydif += dotydif * .2 + Math.round(decade * .14);
 						}
 						if (from.y == localeventsy || to.y == localeventsy) {
 							// está en el "techo"
-							ydif += Math.round(dotydif / 6);
+							ydif += Math.round(dotydif * .16);
 						}
 						if (from.eventdata.mes != null) {
-							ydif += Math.round(from.eventdata.mes/2);
+							ydif += Math.round(from.eventdata.mes * .5);
 						}
 						if (to.eventdata.mes != null) {
-							ydif += Math.round(to.eventdata.mes/3);
+							ydif += Math.round(to.eventdata.mes * .33);
 						}
 						if (from.eventdata.dia != null) {
-							ydif += Math.round(from.eventdata.dia/4);
+							ydif += Math.round(from.eventdata.dia * .25);
 						}
 						if (to.eventdata.dia != null) {
-							ydif += Math.round(to.eventdata.dia/5);
+							ydif += Math.round(to.eventdata.dia * .2);
 						}
 						if (linetype == "predecessor") {
 							ydif += 3;
@@ -455,11 +467,11 @@
 							relationsClip.graphics.lineStyle(0, color, 1, false, "normal", null);
 							relationsClip.graphics.moveTo(start.x, start.y);
 							if (start.x > end.x) {
-								relationsClip.graphics.lineTo(start.x - oneyearfullwidth / 4, start.y + ydif);
-								relationsClip.graphics.lineTo(end.x + oneyearfullwidth / 4, start.y + ydif);
+								relationsClip.graphics.lineTo(start.x - oneyearfullwidth * .25, start.y + ydif);
+								relationsClip.graphics.lineTo(end.x + oneyearfullwidth * .25, start.y + ydif);
 							} else {
-								relationsClip.graphics.lineTo(start.x + oneyearfullwidth / 5, start.y + ydif);
-								relationsClip.graphics.lineTo(end.x - oneyearfullwidth / 5, start.y + ydif);
+								relationsClip.graphics.lineTo(start.x + oneyearfullwidth * .2, start.y + ydif);
+								relationsClip.graphics.lineTo(end.x - oneyearfullwidth * .2, start.y + ydif);
 							}
 							relationsClip.graphics.lineTo(end.x, end.y);
 						} else {
@@ -470,11 +482,11 @@
 							}
 							dashedline.moveTo(start.x, start.y);
 							if (start.x > end.x) {
-								dashedline.lineTo(start.x - oneyearfullwidth / 5, start.y + ydif);
-								dashedline.lineTo(end.x + oneyearfullwidth / 5, start.y + ydif);
+								dashedline.lineTo(start.x - oneyearfullwidth * .2, start.y + ydif);
+								dashedline.lineTo(end.x + oneyearfullwidth * .2, start.y + ydif);
 							} else {
-								dashedline.lineTo(start.x + oneyearfullwidth / 6, start.y + ydif);
-								dashedline.lineTo(end.x - oneyearfullwidth / 6, start.y + ydif);
+								dashedline.lineTo(start.x + oneyearfullwidth * .16, start.y + ydif);
+								dashedline.lineTo(end.x - oneyearfullwidth * .16, start.y + ydif);
 							}
 							dashedline.lineTo(end.x, end.y);
 							relationsClip.addChild(dashedline);
@@ -577,6 +589,7 @@
 		public function eventClick(e:MouseEvent):void {
 			var d:TLDot = TLDot(e.target.parent);
 			var index:int = int(d.name.substr(6));
+			removeResults();
 			//eventDisable(index);
 			currenteventindex = index;
 			processSWFAddress("/" + d.eventdata.nid);
@@ -601,6 +614,7 @@
 			detail.y = local.y;
 			detail.addEventListener("prevClick", eventPrev);
 			detail.addEventListener("nextClick", eventNext);
+			detail.addEventListener("link", taglinkHandler);
 			detail.close_mc.addEventListener(MouseEvent.CLICK, closeClick);
 			detail.close_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
 			detail.close_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
@@ -618,6 +632,11 @@
 				detail.arrow_l_mc.visible = false;
 			}
 			eventReset(eventdata.index);
+		}
+
+		private function taglinkHandler(e:Event):void {
+			keyword_txt.text = "tag:" + TLDetail(e.target).taglink;
+			showResults();
 		}
 
 		private function connectDetail(dot:TLDot):void {
@@ -642,6 +661,7 @@
 				detail = TLDetail(timeline_mc.getChildByName("detail"));
 				detail.removeEventListener("prevClick", eventPrev);
 				detail.removeEventListener("nextClick", eventNext);
+				detail.removeEventListener("link", taglinkHandler);
 				detail.close_mc.removeEventListener(MouseEvent.CLICK, closeClick);
 				detail.close_mc.removeEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
 				detail.close_mc.removeEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
@@ -662,6 +682,14 @@
 
 		private function hideLineButtons():void {
 			related_mc.visible = inspired_mc.visible = predecessor_mc.visible = false;
+		}
+
+		private function showSearch():void {
+			keyword_txt.visible = buscar_btn.visible = true;
+		}
+
+		private function hideSearch():void {
+			keyword_txt.visible = buscar_btn.visible = false;
 		}
 
 		private function toggleClick(e:MouseEvent):void {
@@ -942,6 +970,21 @@
 			TweenMax.to(scrub_mc, 1.0, {x:newx, ease:Expo.easeOut});
 		}
 
+		public function panTimeline(dir:int):void {
+			hideEmpty();
+			// el clip año
+			var newepochx:int = timelineClip.x + (dir * panjump);
+			if (newepochx > epochmaxx) newepochx = epochmaxx;
+			if (newepochx < epochminx) newepochx = epochminx;
+			TweenMax.to(timelineClip, 1.0, {x:newepochx, ease:Expo.easeOut, onComplete:eventEnableVisible});
+			// scrub
+			var newx:int;
+			newx = Math.round(((miniwidth) * newepochx) / epochminx);
+			if (newx > miniwidth) newx = miniwidth;
+			if (newx < 0) newx = 0;
+			TweenMax.to(scrub_mc, 1.0, {x:newx, ease:Expo.easeOut});
+		}
+
 		public function scrubTimeline(e:MouseEvent):void {
 			hideEmpty();
 			removeDetailConnector();
@@ -1072,49 +1115,96 @@
 		/* *********************************************************************
 		 * BUSCADOR
 		 */
-		private function showResults(str:String):void {
+		private function showResults():void {
 			removeResults();
-			trace(str);
-			// mientras se hace bien
-			var d:TLDot = getEvent(1);
-			var index:int = int(d.name.substr(6));
-			//eventDisable(index);
-			centerOnEvent(d);
-			currenteventindex = index;
-			showDetail(d.eventdata);
-			// cajita resultados
-			var r:TLResults = new TLResults();
-			r.name = "results";
-			var global:Point = new Point(resultsx, resultsy);
-			var local:Point = timeline_mc.globalToLocal(global);
-			r.x = local.x;
-			r.y = local.y;
-			r.close_mc.addEventListener(MouseEvent.CLICK, closeResultsClick);
-			r.close_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
-			r.close_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
-			r.close_mc.buttonMode = true;
-			timeline_mc.addChild(r);
+			var str:String = StringUtil.trim(keyword_txt.text);
+			if (str.length > 1) {
+				var r:Array;
+				r = search(str);
+				// cajita resultados
+				var rclip:TLResults = new TLResults();
+				rclip.name = "results";
+				rclip.x = resultsx;
+				rclip.y = resultsy;
+				rclip.close_mc.addEventListener(MouseEvent.CLICK, closeResultsClick);
+				rclip.close_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
+				rclip.close_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
+				rclip.close_mc.buttonMode = true;
+				addChild(rclip);
+				rclip.addEventListener("update", handleResultUpdate);
+				rclip.initWithResultsAndQuery(r, str);
+			}
+		}
+
+		private function handleResultUpdate(e:Event):void {
+			processSWFAddress("/" + e.target.currentResult.eventdata.nid);
 		}
 
 		private function removeResults():void {
 			var r:TLResults;
-			if (timeline_mc.getChildByName("results")) {
-				r = TLResults(timeline_mc.getChildByName("results"));
+			if (getChildByName("results")) {
+				r = TLResults(getChildByName("results"));
+				r.removeEventListener("update", handleResultUpdate);
 				r.close_mc.removeEventListener(MouseEvent.CLICK, closeResultsClick);
 				r.close_mc.removeEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
 				r.close_mc.removeEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
-				timeline_mc.removeChild(r);
+				removeChild(r);
 			}
 		}
 
-		private function searchClick(event:MouseEvent):void {
-			var str:String = keyword_txt.text;
-			if (0) showResults(str);
+		private function searchClick(event:MouseEvent = null):void {
+			showResults();
 		}
 
 		private function closeResultsClick(event:MouseEvent):void {
 			removeResults();
 			eventEnableVisible();
+		}
+
+		private function search(str:String):Array {
+			var r:Array = [];
+			var i:int;
+			var l:int = eventDots.length;
+			var e:TLDot;
+			var keywords:Array = str.split(" ");
+			var key:String;
+			var reg:RegExp;
+			var foundall:int;
+			var tag:String;
+			for (i = 0;i < l; ++i) {
+				e = eventDots[i];
+				foundall = 0;
+				for each (key in keywords) {
+					if (key != "") {
+						if (key.indexOf("tag:") == 0) {
+							tag = key.substr(4);
+							if (tagInEvent(tag, e)) {
+								foundall++;
+							}
+						} else {
+							reg = new RegExp(key, "i");
+							if (e.eventdata.titulo.search(reg) != -1 || e.eventdata.texto.search(reg) != -1) {
+								foundall++;
+							}
+						}
+					}
+				}
+				if (foundall == keywords.length) {
+					r.push(e);
+				}
+			}
+			return r;
+		}
+
+		private function tagInEvent(tag:String, e:TLDot):Boolean {
+			var t:String;
+			for each (t in e.eventdata.tags) {
+				if (t == tag) {
+					return true;
+					break;
+				}
+			}
+			return false;
 		}
 
 		/* *********************************************************************
@@ -1126,12 +1216,34 @@
 			stage.align = StageAlign.TOP;
 			eventsEmpty(true);
 			hideLineButtons();
-			if (1) {
-				loadEvents();
-			} else {
-				generateEpochs();
-				
-				generateEvents();				
+			hideSearch();
+			
+			phrase_txt.visible = true;
+			phrase_txt.text = "";
+			randomphrases = [];
+			randomphrases[0] = "loading assets...";
+			randomphrases[1] = "which character was the rabbit in 'sam n max hit the road'?\n\na) sam\nb) max\nc) mad scientist\nd) none of the above";
+			randomphrases[2] = "'the dig' is the name of a game by which of these?\n\na) lucasarts\nb) activision\nc) midway\nd) none of the above";
+			randomphrases[3] = "which of these was not made by trilobyte?\n\na) the 7th guest\nb) the 11th hour\nc) the 13th floor";
+			randomphrases[4] = "these questions remember you of which game?\n\na)darklands\nb)monkey island\nc)leisure suit larry\nd)wtf?";
+			randomphrases[5] = "loading more assets...";
+			randomphrases = randomphrases.sort(function (a:*,b:*):Number {
+				a;
+				b;
+				return Math.round(Math.random() * 2) - 1; 
+			});
+			addEventListener(Event.ENTER_FRAME, showPreloader);
+			loadEvents();
+		}
+		
+		private function showPreloader(event:Event):void {
+			if (getTimer() - lastphrasetime > phrasetime) {
+				lastphrasetime = getTimer();
+				phrase_txt.text = randomphrases[lastphrase];
+				trace(randomphrases[lastphrase]);
+				if (lastphrase<randomphrases.length-1) {
+					lastphrase++;
+				}
 			}
 		}
 
@@ -1222,6 +1334,21 @@
 			inspired_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			inspired_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			inspired_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
+			
+			keyword_txt.addEventListener(FocusEvent.FOCUS_IN, removeTextHandlers);
+			keyword_txt.addEventListener(FocusEvent.FOCUS_OUT, addTextHandlers);
+		}
+
+		private function addTextHandlers(event:FocusEvent):void {
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+			stage.addEventListener(KeyboardEvent.KEY_UP, keyUpHandler);
+			keyword_txt.removeEventListener(KeyboardEvent.KEY_DOWN, returnHandler);
+		}
+
+		private function removeTextHandlers(event:FocusEvent):void {
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+			stage.removeEventListener(KeyboardEvent.KEY_UP, keyUpHandler);
+			keyword_txt.addEventListener(KeyboardEvent.KEY_DOWN, returnHandler);
 		}
 
 		/* *********************************************************************
@@ -1230,7 +1357,7 @@
 		private function keyDownHandler(e:KeyboardEvent):void {
 			// 32 = SPACE
 			var code:uint = e.keyCode;
-			if (code == 32 && !spacepressed) {
+			if (code == Keyboard.SPACE && !spacepressed) {
 				stage.quality = StageQuality.LOW;
 				spacepressed = true;
 				var i:int;
@@ -1240,12 +1367,90 @@
 				showLineButtons();
 				plotRelations();
 			}
+			var mustupdate:Boolean = false;
+			var btn:MovieClip;
+			var t:Boolean;
+			if (code == Keyboard.RIGHT) {
+				panTimeline(-1);
+			} else if (code == Keyboard.LEFT) {
+				panTimeline(1);
+			} else if (code == 65) { 
+				// A
+				btn = person_mc;
+				t = personvisible = !personvisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 83) { 
+				// S
+				btn = technology_mc;
+				t = technologyvisible = !technologyvisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 68) { 
+				// D
+				btn = business_mc;
+				t = businessvisible = !businessvisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 70) { 
+				// F
+				btn = console_mc;
+				t = consolevisible = !consolevisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 71) { 
+				// G
+				btn = controller_mc;
+				t = controllervisible = !controllervisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 72) { 
+				// H
+				btn = game_mc;
+				t = gamevisible = !gamevisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 74) { 
+				// J
+				btn = cultural_mc;
+				t = culturalvisible = !culturalvisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 75) { 
+				// K
+				btn = other_mc;
+				t = othervisible = !othervisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 81 && spacepressed) { 
+				// Q
+				btn = inspired_mc;
+				t = inspiredvisible = !inspiredvisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 87 && spacepressed) { 
+				// W
+				btn = predecessor_mc;
+				t = predecessorvisible = !predecessorvisible;
+				mustupdate = true;
+				updateView();
+			} else if (code == 69 && spacepressed) { 
+				// E
+				btn = related_mc;
+				t = relatedvisible = !relatedvisible;
+				mustupdate = true;
+			}
+			if (mustupdate) {
+				btn.gotoAndStop(t ? 1 : 2);
+				updateView();
+				if (spacepressed) plotRelations();
+			}
 		}
-		
+
 		private function keyUpHandler(e:KeyboardEvent):void {
 			// 32 = SPACE
 			var code:uint = e.keyCode;
-			if (code == 32) {
+			if (code == Keyboard.SPACE) {
 				stage.quality = StageQuality.HIGH;
 				spacepressed = false;
 				var i:int;
@@ -1256,7 +1461,13 @@
 				clearRelations();
 			}
 		}
-		
+
+		private function returnHandler(e:KeyboardEvent):void {
+			if (e.keyCode == Keyboard.ENTER) {
+				searchClick();
+			}
+		}
+
 		/* *********************************************************************
 		 * SWFADDRESS
 		 */
@@ -1334,7 +1545,7 @@
 				o.titulo = node.title;
 				o.texto = node.body;
 				o.color = StringUtils.web2rgb(eventcolors[o.tipo]);
-				o.links = [{name:"source", url:node.field_source[0].value},{name:"permalink", url:_url + "node/" + node.nid}];
+				o.links = [{name:"source", url:node.field_source[0].value},{name:"text link", url:_url + "node/" + node.nid}];
 				if (node.field_photo[0] != null) {
 					o.thumb = (node.field_photo[0].filepath == null) ? null : _url + "sites/default/files/imagecache/event-th/" + String(node.field_photo[0].filepath).replace("sites/default/files/", "");
 					o.photo = (node.field_photo[0].filepath == null) ? null : _url + "sites/default/files/imagecache/event-big/" + String(node.field_photo[0].filepath).replace("sites/default/files/", "");
@@ -1369,7 +1580,7 @@
 				timelineevents.push(o);
 			}
 			minyear--;
-			maxyear += 3;
+			maxyear += 4;
 			timelineepochs = [];
 			timelineepochs.push({
 				color: {r:0, g:0, b:0}, ini: minyear, fin: maxyear, titulo: ""
@@ -1390,6 +1601,9 @@
 			} else {
 				centerOnYear(1950);
 			}
+			removeEventListener(Event.ENTER_FRAME, showPreloader);
+			phrase_txt.visible = false;
+			showSearch();
 		}
 
 		private function onFault(f:Object):void {

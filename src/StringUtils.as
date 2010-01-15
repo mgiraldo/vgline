@@ -10,7 +10,7 @@ package {
 	/**
 	 * @author Mauricio Giraldo Arteaga <http://www.mauriciogiraldo.com/> 
 	 */
-	public class StringUtils {
+	public final class StringUtils {
 
 		public static function word(newLength:uint = 1, userAlphabet:String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"):String {
 			var alphabet:Array = userAlphabet.split("");
@@ -44,7 +44,7 @@ package {
 			return(r << 16 | g << 8 | b);
 		}
 
-		function hex2rgb(hex:Number):Object {
+		public static function hex2rgb(hex:Number):Object {
 			var red:Number = hex >> 16;
 			var greenBlue:Number = hex - (red << 16);
 			var green:Number = greenBlue >> 8;

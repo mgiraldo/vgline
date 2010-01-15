@@ -6,7 +6,7 @@
  *
  */
 package {
-
+	import flash.events.TextEvent;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.StyleSheet;
 	import flash.events.MouseEvent;
@@ -35,6 +35,7 @@ package {
 		public var dataClip:MovieClip;
 		public var mask_mc:MovieClip;
 		public var fondo_mc:MovieClip;
+		public var taglink:String;
 
 		public function TLDetail() {
 		}
@@ -64,7 +65,7 @@ package {
 			if (data.tags.length > 0) {
 				texthtml += "<p class='text'>Tags: ";
 				for each (var tag in data.tags) {
-					texthtml += "<a class='link'>" + tag + "</a> ";
+					texthtml += "<a class='link' href='event:" + tag + "'>" + tag + "</a> ";
 				}
 				texthtml += "<br>&nbsp;</p>";
 			}
@@ -76,12 +77,13 @@ package {
 				}
 				texthtml += "</ul><p>&nbsp;</p>";
 			}
+			
 			var ss:StyleSheet = new StyleSheet();
 			var css:String = ".title { color:#333333; font-family:Inconsolata; font-size:16; leading:2; } ";
 			css += ".date { color:" + StringUtils.rgb2web(data.color.r, data.color.g, data.color.b) + "; font-family:Inconsolata; font-size:14; leading:4; } ";
 			css += ".text { color:#333333; font-family:Inconsolata; font-size:11; leading:4; } ";
-			css += ".link { color:#000000; font-family:Inconsolata; font-size:11; leading:4; } ";
-			css += "a:hover { text-decoration:underline; } ";
+			css += ".link { color:#000000; font-family:Inconsolata; font-size:11; leading:4; text-decoration:underline; } ";
+			css += "a:hover { text-decoration:none; } ";
 			ss.parseCSS(css);
 			
 			var fechahtml:String = "<span class='date'>";
@@ -135,6 +137,7 @@ package {
 			// Make a scroll bar from movieclips on the stage
 			new SimpleScrollText(drag_mc, track_mc, null, null, null, dataClip, mask_mc);
 			
+			content_txt.addEventListener(TextEvent.LINK, taglinkHandler);
 			arrow_l_mc.buttonMode = true;
 			arrow_r_mc.buttonMode = true;
 			arrow_l_mc.addEventListener(MouseEvent.CLICK, eventPrev);
@@ -146,6 +149,11 @@ package {
 			drag_mc.addEventListener(MouseEvent.ROLL_OVER, controlRollOver);
 			drag_mc.addEventListener(MouseEvent.ROLL_OUT, controlRollOut);
 			drag_mc.addEventListener(MouseEvent.MOUSE_DOWN, controlDown);
+		}
+		
+		private function taglinkHandler(e:TextEvent):void {
+			taglink = e.text;
+			dispatchEvent(new Event("link"));
 		}
 
 		private function controlRollOver(e:MouseEvent):void {

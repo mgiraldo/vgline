@@ -352,52 +352,57 @@
 			clearRelations();
 			for (i = 0;i < l; ++i) {
 				d = eventDots[i];
-				if (d.eventdata.tipo == 1) {		
+				if (d.eventdata.tipo == 1 && consolevisible) {		
 					// Console
 					// consolas con sus empresas
-					if (businessvisible && consolevisible && inspiredvisible) drawRelations(d, 4, d.eventdata.inspired);
+					if (businessvisible && inspiredvisible) drawRelation(d, 4, d.eventdata.inspired);
 					// consolas con consolas que las anteceden
-					if (consolevisible && predecessorvisible) drawRelations(d, 1, d.eventdata.predecessor, "predecessor");
+					if (predecessorvisible) drawRelation(d, 1, d.eventdata.predecessor, "predecessor");
 					// consolas con personas relacionadas
-					if (consolevisible && personvisible && relatedvisible) drawRelations(d, 7, d.eventdata.related, "related");
-				} else if (d.eventdata.tipo == 2) {
+					if (personvisible && relatedvisible) drawRelation(d, 7, d.eventdata.related, "related");
+				} else if (d.eventdata.tipo == 2 && controllervisible) {
 					// Controller
 					// controles con su consola
-					if (consolevisible && controllervisible && relatedvisible) drawRelations(d, 1, d.eventdata.related, "related");
-				} else if (d.eventdata.tipo == 3) {
+					if (consolevisible && relatedvisible) drawRelation(d, 1, d.eventdata.related, "related");
+				} else if (d.eventdata.tipo == 3 && gamevisible) {
 					// Game
 					// juegos con juegos que los anteceden
-					if (gamevisible && predecessorvisible) drawRelations(d, 3, d.eventdata.predecessor, "predecessor");
+					if (predecessorvisible) drawRelation(d, 3, d.eventdata.predecessor, "predecessor");
 					// juegos con creadores
-					if (personvisible && gamevisible && inspiredvisible) drawRelations(d, 7, d.eventdata.inspired);
-					// juegos con empresas
-					if (businessvisible && gamevisible && inspiredvisible) drawRelations(d, 4, d.eventdata.inspired);
+					if (personvisible && inspiredvisible) drawRelation(d, 7, d.eventdata.inspired);
 					// juegos con juegos relacionados
-					if (gamevisible && relatedvisible) drawRelations(d, 3, d.eventdata.related, "related");
+					if (relatedvisible) drawRelation(d, 3, d.eventdata.related, "related");
+					// juegos con empresas
+					if (businessvisible && inspiredvisible) drawRelation(d, 4, d.eventdata.inspired);
 					// juegos con consolas relacionadas
-					if (gamevisible && consolevisible && relatedvisible) drawRelations(d, 1, d.eventdata.related, "related");
-				} else if (d.eventdata.tipo == 4) {
+					if (consolevisible && relatedvisible) drawRelation(d, 1, d.eventdata.related, "related");
+				} else if (d.eventdata.tipo == 4 && businessvisible) {
 					// Business
 					// negocios con sus fundadores
-					if (personvisible && businessvisible && inspiredvisible) drawRelations(d, 7, d.eventdata.inspired);
-				} else if (d.eventdata.tipo == 5) {
+					if (personvisible && inspiredvisible) drawRelation(d, 7, d.eventdata.inspired);
+				} else if (d.eventdata.tipo == 5 && technologyvisible) {
 					// Technology
 					// tecnologías con personas creadoras
-					if (businessvisible && technologyvisible && inspiredvisible) drawRelations(d, 7, d.eventdata.inspired);
+					if (personvisible && inspiredvisible) drawRelation(d, 7, d.eventdata.inspired);
 					// tecnologías con empresas
-					if (businessvisible && technologyvisible && inspiredvisible) drawRelations(d, 4, d.eventdata.inspired);
+					if (businessvisible && inspiredvisible) drawRelation(d, 4, d.eventdata.inspired);
 					// tecnologías con consolas relacionadas
-					if (consolevisible && technologyvisible && relatedvisible) drawRelations(d, 1, d.eventdata.related, "related");
-				} else if (d.eventdata.tipo == 6) {
+					if (consolevisible && relatedvisible) drawRelation(d, 1, d.eventdata.related, "related");
+				} else if (d.eventdata.tipo == 6 && culturalvisible) {
 					// Cultural
 					// cultura con su creador
-					if (personvisible && culturalvisible && inspiredvisible) drawRelations(d, 7, d.eventdata.inspired);
+					if (personvisible && inspiredvisible) drawRelation(d, 7, d.eventdata.inspired);
 					// cultura con su antecesora
-					if (culturalvisible && predecessorvisible) drawRelations(d, 6, d.eventdata.predecessor, "predecessor");
+					if (predecessorvisible) drawRelation(d, 6, d.eventdata.predecessor, "predecessor");
 					// cultura con juegos relacionados
-					if (culturalvisible && gamevisible && relatedvisible) drawRelations(d, 6, d.eventdata.related, "related");
-				} else if (d.eventdata.tipo == 7) {	// Person
-				} else if (d.eventdata.tipo == 8) {	// Other
+					if (gamevisible && relatedvisible) drawRelation(d, 6, d.eventdata.related, "related");
+				} else if (d.eventdata.tipo == 7 && personvisible) {	// Person
+				} else if (d.eventdata.tipo == 8 && othervisible) {	
+					// Other
+					// cultura con juegos relacionados
+					if (predecessorvisible) drawRelation(d, 8, d.eventdata.predecessor, "predecessor");
+					// cultura con juegos relacionados
+					if (relatedvisible) drawRelation(d, 8, d.eventdata.related, "related");
 				}
 			}
 		}
@@ -413,7 +418,7 @@
 			}
 		}
 
-		private function drawRelations(from:TLDot, totype:int, nidarray:Array, linetype:String = "solid"):void {
+		private function drawRelation(from:TLDot, totype:int, nidarray:Array, linetype:String = "inspired"):void {
 			var dotxy:Point;
 			var relxy:Point;
 			var color:Number = StringUtils.rgb2hex(from.eventdata.color.r, from.eventdata.color.g, from.eventdata.color.b);
@@ -425,10 +430,11 @@
 			var ydif:int;
 			var decade:int;
 			var dashedline:DashedLine;
-			if (nidarray.length > 0) {
-				for (i = 0;i < nidarray.length; ++i) {
-					to = getEventByNid(nidarray[i]);
-					if (to.eventdata.tipo == totype) { 
+			var l:int = nidarray.length;
+			if (l > 0) {
+				for (i = 0;i < l; ++i) {
+					to = getEventByNid(nidarray[i].nid);
+					if (to != null && to.eventdata.tipo == totype) { 
 						// relacionamos controles con su consola
 						// convertir coords rdot a global
 						relxy = to.localToGlobal(new Point(relationxfin, relationyfin));
@@ -463,30 +469,30 @@
 							ydif += 4;
 						}
 						// pintamos la raya en funcion de las globales
-						if (linetype == "solid") {
+						if (linetype == "inspired") {
 							relationsClip.graphics.lineStyle(0, color, 1, false, "normal", null);
 							relationsClip.graphics.moveTo(start.x, start.y);
 							if (start.x > end.x) {
-								relationsClip.graphics.lineTo(start.x - oneyearfullwidth * .25, start.y + ydif);
-								relationsClip.graphics.lineTo(end.x + oneyearfullwidth * .25, start.y + ydif);
+								relationsClip.graphics.lineTo(start.x - oneyearfullwidth * .12, start.y + ydif);
+								relationsClip.graphics.lineTo(end.x + oneyearfullwidth * .12, start.y + ydif);
 							} else {
-								relationsClip.graphics.lineTo(start.x + oneyearfullwidth * .2, start.y + ydif);
-								relationsClip.graphics.lineTo(end.x - oneyearfullwidth * .2, start.y + ydif);
+								relationsClip.graphics.lineTo(start.x + oneyearfullwidth * .1, start.y + ydif);
+								relationsClip.graphics.lineTo(end.x - oneyearfullwidth * .1, start.y + ydif);
 							}
 							relationsClip.graphics.lineTo(end.x, end.y);
 						} else {
 							if (linetype == "predecessor") {
 								dashedline = new DashedLine(1, color, new Array(4, 2));
 							} else if (linetype == "related") {
-								dashedline = new DashedLine(1, color, new Array(6, 2, 2, 2));
+								dashedline = new DashedLine(1, color, new Array(6, 3, 2, 3));
 							}
 							dashedline.moveTo(start.x, start.y);
 							if (start.x > end.x) {
-								dashedline.lineTo(start.x - oneyearfullwidth * .2, start.y + ydif);
-								dashedline.lineTo(end.x + oneyearfullwidth * .2, start.y + ydif);
+								dashedline.lineTo(start.x - oneyearfullwidth * .13, start.y + ydif);
+								dashedline.lineTo(end.x + oneyearfullwidth * .13, start.y + ydif);
 							} else {
-								dashedline.lineTo(start.x + oneyearfullwidth * .16, start.y + ydif);
-								dashedline.lineTo(end.x - oneyearfullwidth * .16, start.y + ydif);
+								dashedline.lineTo(start.x + oneyearfullwidth * .11, start.y + ydif);
+								dashedline.lineTo(end.x - oneyearfullwidth * .11, start.y + ydif);
 							}
 							dashedline.lineTo(end.x, end.y);
 							relationsClip.addChild(dashedline);
@@ -709,8 +715,9 @@
 			if (timeline_mc.getChildByName("tip")) timeline_mc.removeChild(timeline_mc.getChildByName("tip"));
 		}
 
-		private function showDetail(eventdata:Object):void {
+		private function showDetail(dot:TLDot):void {
 			removeDetail();
+			var eventdata:Object = getDetailsForDot(dot);
 			detail = new TLDetail();
 			detail.name = "detail";
 			var global:Point = new Point(detailx, detaily);
@@ -739,10 +746,46 @@
 			eventReset(eventdata.index);
 		}
 
+		private function getDetailsForDot(dot:TLDot):Object {
+			var r:Object = dot.eventdata;
+			var i:int;
+			var l:int;
+			if (r.inspired != null) {
+				l = r.inspired.length;
+				for (i = 0;i < l; ++i) {
+					if (r.inspired[i].nid != null) {
+						r.inspired[i].titulo = getEventByNid(r.inspired[i].nid).eventdata.titulo;
+					}
+				}
+			}
+			if (r.related != null) {
+				l = r.related.length;
+				for (i = 0;i < l; ++i) {
+					if (r.related[i].nid != null) {
+						r.related[i].titulo = getEventByNid(r.related[i].nid).eventdata.titulo;
+					}
+				}
+			}
+			if (r.predecessor != null) {
+				l = r.predecessor.length;
+				for (i = 0;i < l; ++i) {
+					if (r.predecessor[i].nid != null) {
+						r.predecessor[i].titulo = getEventByNid(r.predecessor[i].nid).eventdata.titulo;
+					}
+				}
+			}
+			return r;
+		}
+
 		private function taglinkHandler(e:Event):void {
 			if (e.target.name == "detail") {
-				keyword_txt.text = "tag:" + TLDetail(e.target).taglink;
-				showResults();
+				var key:String = TLDetail(e.target).taglink;
+				if (key.indexOf("event=") != 0) {
+					keyword_txt.text = key;
+					showResults();
+				} else {
+					processSWFAddress("/" + key.substr(6));
+				}
 			}
 		}
 
@@ -955,14 +998,25 @@
 					d.visible = businessvisible;
 				} else if (d.eventdata.tipo == 5) {
 					d.visible = technologyvisible;
-				} else if (d.eventdata.tipo == 6) {						
+				} else if (d.eventdata.tipo == 6) {				
 					d.visible = culturalvisible;
 				} else if (d.eventdata.tipo == 7) {
 					d.visible = personvisible;
 				} else if (d.eventdata.tipo == 8) {						
 					d.visible = othervisible;
 				}
-			}
+			}									
+			console_mc.gotoAndStop(consolevisible ? 1 : 2);
+			controller_mc.gotoAndStop(controllervisible ? 1 : 2);
+			game_mc.gotoAndStop(gamevisible ? 1 : 2);
+			business_mc.gotoAndStop(businessvisible ? 1 : 2);
+			technology_mc.gotoAndStop(technologyvisible ? 1 : 2);
+			cultural_mc.gotoAndStop(culturalvisible ? 1 : 2);
+			person_mc.gotoAndStop(personvisible ? 1 : 2);
+			other_mc.gotoAndStop(othervisible ? 1 : 2);
+			inspired_mc.gotoAndStop(inspiredvisible ? 1 : 2);
+			predecessor_mc.gotoAndStop(predecessorvisible ? 1 : 2);
+			related_mc.gotoAndStop(relatedvisible ? 1 : 2);
 		}
 
 		/* *********************************************************************
@@ -973,7 +1027,7 @@
 			if (index != -1) {
 				// aca sacar el dot
 			}
-			showDetail(dot.eventdata);
+			showDetail(dot);
 			timelineClip.setChildIndex(dot, timelineClip.numChildren - 1);
 			// epoch
 			dot.grow();
@@ -1211,7 +1265,7 @@
 				foundall = 0;
 				for each (key in keywords) {
 					if (key != "") {
-						if (key.indexOf("tag:") == 0) {
+						if (key.indexOf("tag=") == 0) {
 							tag = key.substr(4);
 							if (tagInEvent(tag, d) && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
 								foundall++;
@@ -1260,9 +1314,9 @@
 			randomphrases[1] = "which character was the rabbit in 'sam n max hit the road'?\n\na) sam\nb) max\nc) mad scientist\nd) none of the above";
 			randomphrases[2] = "'the dig' is the name of a game by which of these?\n\na) lucasarts\nb) activision\nc) midway\nd) none of the above";
 			randomphrases[3] = "which of these was not made by trilobyte?\n\na) the 7th guest\nb) the 11th hour\nc) the 13th floor";
-			randomphrases[4] = "these questions remember you of which game?\n\na)darklands\nb)monkey island\nc)leisure suit larry\nd)wtf?";
+			randomphrases[4] = "these questions remember you of which game?\n\na) darklands\nb) monkey island\nc) leisure suit larry\nd) wtf?";
 			randomphrases[5] = "loading more assets...";
-			randomphrases[6] = "in what world do you get the first flute in 'super mario bros. 3'?\n\na)2-1\nb)3-2\nc)1-3\nd)3-1";
+			randomphrases[6] = "in what world do you get the first flute in 'super mario bros. 3'?\n\na) 2-1\nb) 3-2\nc) 1-3\nd) 3-1";
 			randomphrases = randomphrases.sort(function (a:*,b:*):Number {
 				a;
 				b;
@@ -1318,37 +1372,37 @@
 			person_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			person_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			technology_mc.buttonMode = true;
-			technology_mc.hitArea = person_mc.hit_mc;
+			technology_mc.hitArea = technology_mc.hit_mc;
 			technology_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			technology_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			technology_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			business_mc.buttonMode = true;
-			business_mc.hitArea = person_mc.hit_mc;
+			business_mc.hitArea = business_mc.hit_mc;
 			business_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			business_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			business_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			console_mc.buttonMode = true;
-			console_mc.hitArea = person_mc.hit_mc;
+			console_mc.hitArea = console_mc.hit_mc;
 			console_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			console_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			console_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			controller_mc.buttonMode = true;
-			controller_mc.hitArea = person_mc.hit_mc;
+			controller_mc.hitArea = controller_mc.hit_mc;
 			controller_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			controller_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			controller_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			game_mc.buttonMode = true;
-			game_mc.hitArea = person_mc.hit_mc;
+			game_mc.hitArea = game_mc.hit_mc;
 			game_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			game_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			game_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			cultural_mc.buttonMode = true;
-			cultural_mc.hitArea = person_mc.hit_mc;
+			cultural_mc.hitArea = cultural_mc.hit_mc;
 			cultural_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			cultural_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			cultural_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			other_mc.buttonMode = true;
-			other_mc.hitArea = person_mc.hit_mc;
+			other_mc.hitArea = other_mc.hit_mc;
 			other_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			other_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			other_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
@@ -1403,80 +1457,56 @@
 				plotRelations();
 			}
 			var mustupdate:Boolean = false;
-			var btn:MovieClip;
-			var t:Boolean;
 			if (code == Keyboard.RIGHT) {
 				panTimeline(-1);
 			} else if (code == Keyboard.LEFT) {
 				panTimeline(1);
 			} else if (code == 65) { 
 				// A
-				btn = person_mc;
-				t = personvisible = !personvisible;
+				personvisible = !personvisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 83) { 
 				// S
-				btn = technology_mc;
-				t = technologyvisible = !technologyvisible;
+				technologyvisible = !technologyvisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 68) { 
 				// D
-				btn = business_mc;
-				t = businessvisible = !businessvisible;
+				businessvisible = !businessvisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 70) { 
 				// F
-				btn = console_mc;
-				t = consolevisible = !consolevisible;
+				consolevisible = !consolevisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 71) { 
 				// G
-				btn = controller_mc;
-				t = controllervisible = !controllervisible;
+				controllervisible = !controllervisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 72) { 
 				// H
-				btn = game_mc;
-				t = gamevisible = !gamevisible;
+				gamevisible = !gamevisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 74) { 
 				// J
-				btn = cultural_mc;
-				t = culturalvisible = !culturalvisible;
+				culturalvisible = !culturalvisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 75) { 
 				// K
-				btn = other_mc;
-				t = othervisible = !othervisible;
+				othervisible = !othervisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 81 && spacepressed) { 
 				// Q
-				btn = inspired_mc;
-				t = inspiredvisible = !inspiredvisible;
+				inspiredvisible = !inspiredvisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 87 && spacepressed) { 
 				// W
-				btn = predecessor_mc;
-				t = predecessorvisible = !predecessorvisible;
+				predecessorvisible = !predecessorvisible;
 				mustupdate = true;
-				updateView();
 			} else if (code == 69 && spacepressed) { 
 				// E
-				btn = related_mc;
-				t = relatedvisible = !relatedvisible;
+				relatedvisible = !relatedvisible;
 				mustupdate = true;
 			}
 			if (mustupdate) {
-				btn.gotoAndStop(t ? 1 : 2);
 				updateView();
 				if (spacepressed) plotRelations();
 			}
@@ -1516,6 +1546,33 @@
 		private function gotoURL(url:String):void {
 			var nid:int = parseInt(url.replace("/", ""));
 			var d:TLDot = getEventByNid(nid);
+			switch (d.eventdata.tipo) {
+				case 7:
+					personvisible = true;
+					break;
+				case 5:
+					technologyvisible = true;
+					break;
+				case 4:
+					businessvisible = true;
+					break;
+				case 1:
+					consolevisible = true;
+					break;
+				case 2:
+					controllervisible = true;
+					break;
+				case 3:
+					gamevisible = true;
+					break;
+				case 6:
+					culturalvisible = true;
+					break;
+				case 8:
+					othervisible = true;
+					break;
+			}
+			updateView();
 			centerOnEvent(d);
 		}
 
@@ -1569,18 +1626,18 @@
 				}
 				o = {};
 				o.nid = node.nid;
-				o.ano = node.field_year[0].value;
-				o.anotext = o.ano;
+				o.ano = Number(node.field_year[0].value);
+				o.anotext = node.field_year[0].value;
 				if (o.ano < 0) {
 					o.anotext = Math.abs(o.ano) + " " + bcyearname;
 				}
 				o.mes = node.field_month[0].value;
 				o.dia = node.field_day[0].value;
-				o.tipo = node.field_category[0].value;
+				o.tipo = Number(node.field_category[0].value);
 				o.titulo = node.title;
 				o.texto = node.body;
 				o.color = StringUtils.web2rgb(eventcolors[o.tipo]);
-				o.links = [{name:"source", url:node.field_source[0].value},{name:"text link", url:_url + "node/" + node.nid}];
+				o.links = [{name:"text link", url:_url + "node/" + node.nid},{name:"source", url:node.field_source[0].value},{name:"more information", url:node.field_extra_source[0].value}];
 				if (node.field_photo[0] != null) {
 					o.thumb = (node.field_photo[0].filepath == null) ? null : _url + "sites/default/files/imagecache/event-th/" + String(node.field_photo[0].filepath).replace("sites/default/files/", "");
 					o.photo = (node.field_photo[0].filepath == null) ? null : _url + "sites/default/files/imagecache/event-big/" + String(node.field_photo[0].filepath).replace("sites/default/files/", "");
@@ -1590,19 +1647,19 @@
 				o.inspired = [];
 				if (node.field_inspired[0] != null) {
 					for each (rel in node.field_inspired) {
-						if (rel.nid != null) o.inspired.push(rel.nid);
+						if (rel.nid != null) o.inspired.push({nid:rel.nid, titulo:""});
 					}
 				}
 				o.related = [];
 				if (node.field_related[0] != null) {
 					for each (rel in node.field_related) {
-						if (rel.nid != null) o.related.push(rel.nid);
+						if (rel.nid != null) o.related.push({nid:rel.nid, titulo:""});
 					}
 				}
 				o.predecessor = [];
 				if (node.field_predecessor[0] != null) {
 					for each (rel in node.field_predecessor) {
-						if (rel.nid != null) o.predecessor.push(rel.nid);
+						if (rel.nid != null) o.predecessor.push({nid:rel.nid, titulo:""});
 					}
 				}
 				// tags

@@ -62,18 +62,57 @@ package {
 			var titlehtml:String = "<p class='title'>" + data.titulo + "</p>";
 			var texthtml:String = "<p class='text'>" + data.texto + "</p>";
 			
+			var i:int;
+			if (data.inspired != null) {
+				if (data.inspired.length > 0) {
+					texthtml += "<p class='text'>Created by: ";
+					for (i = 0;i < data.inspired.length; ++i) {
+						if (data.inspired[i].nid != null) {
+							texthtml += "<a class='link' href='event:event=" + data.inspired[i].nid + "'>" + data.inspired[i].titulo + "</a> ";
+						}
+					}
+					texthtml += "<br>&nbsp;</p>";
+				}
+			}
+			
+			if (data.predecessor != null) {
+				if (data.predecessor.length > 0) {
+					texthtml += "<p class='text'>Predecessor: ";
+					for (i = 0;i < data.predecessor.length; ++i) {
+						if (data.predecessor[i].nid != null) {
+							texthtml += "<a class='link' href='event:event=" + data.predecessor[i].nid + "'>" + data.predecessor[i].titulo + "</a> ";
+						}
+					}
+					texthtml += "<br>&nbsp;</p>";
+				}
+			}
+			
+			if (data.related != null) {
+				if (data.related.length > 0) {
+					texthtml += "<p class='text'>Related: ";
+					for (i = 0;i < data.related.length; ++i) {
+						if (data.related[i].nid != null) {
+							texthtml += "<a class='link' href='event:event=" + data.related[i].nid + "'>" + data.related[i].titulo + "</a> ";
+						}
+					}
+					texthtml += "<br>&nbsp;</p>";
+				}
+			}
+			
 			if (data.tags.length > 0) {
 				texthtml += "<p class='text'>Tags: ";
 				for each (var tag in data.tags) {
-					texthtml += "<a class='link' href='event:" + tag + "'>" + tag + "</a> ";
+					texthtml += "<a class='link' href='event:tag=" + tag + "'>" + tag + "</a> ";
 				}
 				texthtml += "<br>&nbsp;</p>";
 			}
+			
 			if (data.links != null) {
-				var i:int;
 				texthtml += "<ul>";
 				for (i = 0;i < data.links.length;++i) {
-					texthtml += "<li class='link'><a href='" + data.links[i].url + "' target='_blank'>" + data.links[i].name + "</a></li>";
+					if (data.links[i].url != null) {
+						texthtml += "<li class='link'><a href='" + data.links[i].url + "' target='_blank'>" + data.links[i].name + "</a></li>";
+					}
 				}
 				texthtml += "</ul><p>&nbsp;</p>";
 			}
@@ -102,7 +141,7 @@ package {
 			date_txt.embedFonts = true;
 			date_txt.antiAliasType = "advanced";
 			date_txt.styleSheet = ss;
-			date_txt.htmlText =  fechahtml;
+			date_txt.htmlText = fechahtml;
 			date_txt.x = 8;
 			date_txt.y = 3;
 
@@ -150,7 +189,7 @@ package {
 			drag_mc.addEventListener(MouseEvent.ROLL_OUT, controlRollOut);
 			drag_mc.addEventListener(MouseEvent.MOUSE_DOWN, controlDown);
 		}
-		
+
 		private function taglinkHandler(e:TextEvent):void {
 			taglink = e.text;
 			dispatchEvent(new Event("link"));

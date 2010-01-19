@@ -227,20 +227,23 @@
 			rulerClip = new MovieClip();
 			rulerClip.name = "ruler_mc";
 			var yearClip:TLRulerYear;
-			for (i = 0;i <= deltayears;++i) {
+			for (i = 0;i < deltayears;++i) {
 				year = i + minyear;
-				if (year < 0) {
-					txt = Math.abs(year).toString() + " " + bcyearname;
-				} else {
-					txt = year.toString();
+				if (year != 0) {
+					// el año cero no existe
+					if (year < 0) {
+						txt = Math.abs(year).toString() + " " + bcyearname;
+					} else {
+						txt = year.toString();
+					}
+					yearClip = new TLRulerYear();
+					yearClip.id = i;
+					yearClip.name = txt;
+					yearClip.year_txt.text = txt;
+					//yearClip.y = Math.round(timelineheight - yearClip.height);
+					yearClip.x = (minyear < 0 && year > 0) ? (i - 1) * yearClip.width : i * yearClip.width;
+					rulerClip.addChild(yearClip);
 				}
-				yearClip = new TLRulerYear();
-				yearClip.id = i;
-				yearClip.name = txt;
-				yearClip.year_txt.text = txt;
-				//yearClip.y = Math.round(timelineheight - yearClip.height);
-				yearClip.x = (year > 0) ? (i - 1) * yearClip.width : i * yearClip.width;
-				rulerClip.addChild(yearClip);
 			}
 			timelineClip.addChild(rulerClip);
 		}
@@ -388,6 +391,8 @@
 					if (businessvisible && inspiredvisible) drawRelation(d, 4, d.eventdata.inspired);
 					// tecnologías con consolas relacionadas
 					if (consolevisible && relatedvisible) drawRelation(d, 1, d.eventdata.related, "related");
+					// tecnologías con predecesoras
+					if (predecessorvisible) drawRelation(d, 5, d.eventdata.predecessor, "predecessor");
 				} else if (d.eventdata.tipo == 6 && culturalvisible) {
 					// Cultural
 					// cultura con su creador
@@ -1095,7 +1100,7 @@
 				removeDetailConnector();
 				//eventDisable();
 				timelinedragging = true;
-				timelineClip.startDrag(false, new Rectangle(timeline_mc.x - (timelineClip.width - swidth), timelineClip.y, timelineClip.width - swidth, 0));
+				timelineClip.startDrag(false, new Rectangle(epochmaxx, timelineClip.y, epochminx, 0));
 			}
 		}
 
@@ -1317,6 +1322,7 @@
 			randomphrases[4] = "these questions remember you of which game?\n\na) darklands\nb) monkey island\nc) leisure suit larry\nd) wtf?";
 			randomphrases[5] = "loading more assets...";
 			randomphrases[6] = "in what world do you get the first flute in 'super mario bros. 3'?\n\na) 2-1\nb) 3-2\nc) 1-3\nd) 3-1";
+			randomphrases[7] = "which of these was not made by sierra online?\n\na) king's quest\nb) police quest\nc) space quest\nd) dragon's quest";
 			randomphrases = randomphrases.sort(function (a:*,b:*):Number {
 				a;
 				b;
@@ -1678,9 +1684,9 @@
 				color: {r:0, g:0, b:0}, ini: minyear, fin: maxyear, titulo: ""
 			});
 			
-			deltayears = maxyear - minyear;
+			deltayears = (minyear > 0) ? maxyear - minyear + 1 : maxyear - minyear; // el año cero no cuenta
 			epochmaxx = 0;
-			epochminx = -Math.floor((oneyearfullwidth * (deltayears)) - swidth);
+			epochminx = -((oneyearfullwidth * (deltayears)) - swidth);
 			miniwidth = track_mc.width - scrub_mc.width;
 			oneyearminiwidth = miniwidth / deltayears;
 			

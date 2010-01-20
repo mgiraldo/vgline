@@ -5,7 +5,7 @@
  * This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  *
  */
-package {
+package com.pingpongestudio.utils {
 
 	/**
 	 * @author Mauricio Giraldo Arteaga <http://www.mauriciogiraldo.com/> 

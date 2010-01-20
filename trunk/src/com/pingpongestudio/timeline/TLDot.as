@@ -5,7 +5,8 @@
  * This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  *
  */
-package {
+package com.pingpongestudio.timeline {
+	import com.pingpongestudio.utils.StringUtils;
 	import com.webdevils.display.ImageLoader;
 
 	import flash.text.StyleSheet;

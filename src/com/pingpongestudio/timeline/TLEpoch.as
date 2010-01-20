@@ -5,21 +5,19 @@
  * This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  *
  */
-package {
+package com.pingpongestudio.timeline {
 	import flash.text.TextField;
 	import flash.display.MovieClip;
 
 	/**
 	 * @author Mauricio Giraldo Arteaga <http://www.mauriciogiraldo.com/> 
 	 */
-	public class TLRulerYear extends MovieClip {
+	public class TLEpoch extends MovieClip {
 
-		public var year_txt:TextField;
-		public var bimesters:Array;
-		public var id:int;
+		public var label_txt:TextField;
+		public var background_mc:MovieClip;
 
-		public function TLRulerYear() {
-			bimesters = [0,[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
+		public function TLEpoch() {
 		}
 	}
 }

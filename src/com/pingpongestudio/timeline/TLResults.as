@@ -5,7 +5,7 @@
  * This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  *
  */
-package {
+package com.pingpongestudio.timeline {
 	import flash.events.MouseEvent;
 
 	import com.webdevils.controls.SimpleScrollText;

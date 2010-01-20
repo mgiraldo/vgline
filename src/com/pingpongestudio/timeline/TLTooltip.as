@@ -5,19 +5,18 @@
  * This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  *
  */
-package {
+package com.pingpongestudio.timeline {
 	import flash.text.TextField;
 	import flash.display.MovieClip;
 
 	/**
 	 * @author Mauricio Giraldo Arteaga <http://www.mauriciogiraldo.com/> 
 	 */
-	public class TLEpoch extends MovieClip {
+	public class TLTooltip extends MovieClip {
 
 		public var label_txt:TextField;
-		public var background_mc:MovieClip;
-
-		public function TLEpoch() {
+		
+		public function TLTooltip() {
 		}
 	}
 }

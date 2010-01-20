@@ -5,14 +5,14 @@
  * This software is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  *
  */
- package {
+ package com.pingpongestudio.timeline {
 
 	/**
 	 * @author Mauricio Giraldo Arteaga <http://www.mauriciogiraldo.com/> 
 	 */
 	// externals
-	import flash.utils.getTimer;
-
+	import com.pingpongestudio.utils.StringUtils;
+	import flash.net.URLRequest;
 	import com.adobe.utils.StringUtil;
 
 	import flash.events.FocusEvent;
@@ -34,6 +34,8 @@
 	import flash.net.NetConnection;
 	import flash.net.Responder;
 	import flash.net.ObjectEncoding;
+	import flash.net.navigateToURL;
+	import flash.utils.getTimer;
 
 	import com.asual.swfaddress.SWFAddress;
 	import com.asual.swfaddress.SWFAddressEvent;
@@ -128,6 +130,8 @@
 		public var related_mc:MovieClip;
 		public var inspired_mc:MovieClip;
 		public var predecessor_mc:MovieClip;
+		public var about_mc:MovieClip;
+		public var contact_mc:MovieClip;
 		public var phrase_txt:TextField;
 		// teclado
 		private var spacepressed:Boolean = false;
@@ -986,6 +990,14 @@
 			removeDetail();
 			eventEnableVisible();
 		}
+		
+		private function aboutClick(e:MouseEvent):void {
+			navigateToURL(new URLRequest(_url + "node/79"));
+		}
+
+		private function contactClick(e:MouseEvent):void {
+			navigateToURL(new URLRequest(_url + "contact"));
+		}
 
 		private function updateView():void {
 			var i:int;
@@ -1429,6 +1441,18 @@
 			inspired_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			inspired_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			inspired_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
+			
+			// botones servicios
+			about_mc.buttonMode = true;
+			about_mc.hitArea = about_mc.hit_mc;
+			about_mc.addEventListener(MouseEvent.CLICK, aboutClick);
+			about_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
+			about_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
+			contact_mc.buttonMode = true;
+			contact_mc.hitArea = contact_mc.hit_mc;
+			contact_mc.addEventListener(MouseEvent.CLICK, contactClick);
+			contact_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
+			contact_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
 			
 			keyword_txt.addEventListener(FocusEvent.FOCUS_IN, removeTextHandlers);
 			keyword_txt.addEventListener(FocusEvent.FOCUS_OUT, addTextHandlers);

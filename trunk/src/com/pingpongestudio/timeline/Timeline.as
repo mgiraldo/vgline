@@ -60,7 +60,7 @@
 		private const connectorx:int = -2;
 		private const connectory:int = -4;
 		private const xdotdetail:int = detailx - 45;
-		private const resultsx:int = 768;
+		private const resultsx:int = 673;
 		private const resultsy:int = 26;
 		private const bcyearname:String = "BC";
 		private const relationxfin:int = 117;
@@ -103,7 +103,7 @@
 		private var maxyear:int = 2020;
 		private var deltayears:int = maxyear - minyear;
 		private const oneyearfullwidth:int = 186;
-		private const panjump:int = Math.round(oneyearfullwidth * 0.5);
+		private const panjump:int = Math.round(oneyearfullwidth);
 		private var timelineevents:Array;
 		private var timelineepochs:Array;
 		private var currenteventindex:int;
@@ -133,6 +133,7 @@
 		public var about_mc:MovieClip;
 		public var contact_mc:MovieClip;
 		public var phrase_txt:TextField;
+		public var rtfm_txt:TextField;
 		// teclado
 		private var spacepressed:Boolean = false;
 		private var personvisible:Boolean = true;
@@ -1289,7 +1290,7 @@
 							}
 						} else {
 							reg = new RegExp(key, "i");
-							if ((d.eventdata.titulo.search(reg) != -1 || d.eventdata.texto.search(reg) != -1) && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
+							if ((d.eventdata.anotext.search(reg) != -1 || d.eventdata.titulo.search(reg) != -1 || d.eventdata.texto.search(reg) != -1)) { // && ((d.eventdata.tipo == 8 && othervisible) || (d.eventdata.tipo == 7 && personvisible) || (d.eventdata.tipo == 6 && culturalvisible) || (d.eventdata.tipo == 5 && technologyvisible) || (d.eventdata.tipo == 4 && businessvisible) || (d.eventdata.tipo == 3 && gamevisible) || (d.eventdata.tipo == 2 && controllervisible) || (d.eventdata.tipo == 1 && consolevisible))) {
 								foundall++;
 							}
 						}
@@ -1331,10 +1332,12 @@
 			randomphrases[1] = "which character was the rabbit in 'sam n max hit the road'?\n\na) sam\nb) max\nc) mad scientist\nd) none of the above";
 			randomphrases[2] = "'the dig' is the name of a game by which of these?\n\na) lucasarts\nb) activision\nc) midway\nd) none of the above";
 			randomphrases[3] = "which of these was not made by trilobyte?\n\na) the 7th guest\nb) the 11th hour\nc) the 13th floor";
-			randomphrases[4] = "these questions remember you of which game?\n\na) darklands\nb) monkey island\nc) leisure suit larry\nd) wtf?";
+			randomphrases[4] = "these questions remind you of which game?\n\na) darklands\nb) monkey island\nc) leisure suit larry\nd) wtf?";
 			randomphrases[5] = "loading more assets...";
 			randomphrases[6] = "in what world do you get the first flute in 'super mario bros. 3'?\n\na) 2-1\nb) 3-2\nc) 1-3\nd) 3-1";
 			randomphrases[7] = "which of these was not made by sierra online?\n\na) king's quest\nb) police quest\nc) space quest\nd) dragon's quest";
+			randomphrases[8] = "which was your favorite 'doom' wad?\n\na) star wars\nb) simpsons\nc) aliens\nd) what is a wad?";
+			randomphrases[9] = "what is the first weapon you find in 'half-life'?\n\na) a stapler\nb) a pistol\nc) a crowbar\nd) a bat";
 			randomphrases = randomphrases.sort(function (a:*,b:*):Number {
 				a;
 				b;
@@ -1356,23 +1359,27 @@
 
 		private function setupListeners():void {
 			noevents_mc.arrow_l_mc.buttonMode = true;
+			noevents_mc.arrow_l_mc.mouseChildren = false;
 			noevents_mc.arrow_l_mc.addEventListener(MouseEvent.CLICK, eventPrevEmpty);
 			noevents_mc.arrow_l_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
 			noevents_mc.arrow_l_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
 			
 			noevents_mc.arrow_r_mc.buttonMode = true;
+			noevents_mc.arrow_r_mc.mouseChildren = false;
 			noevents_mc.arrow_r_mc.addEventListener(MouseEvent.CLICK, eventNextEmpty);
 			noevents_mc.arrow_r_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
 			noevents_mc.arrow_r_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
 			
 			buscar_btn.buttonMode = true;
+			buscar_btn.mouseChildren = false;
 			buscar_btn.addEventListener(MouseEvent.CLICK, searchClick);
 			
 			track_mc.addEventListener(MouseEvent.MOUSE_UP, scrubTimeline);
 
+			scrub_mc.buttonMode = true;
+			scrub_mc.mouseChildren = false;
 			scrub_mc.addEventListener(MouseEvent.MOUSE_DOWN, dragScrub);
 			scrub_mc.addEventListener(MouseEvent.MOUSE_UP, dropScrub);
-			scrub_mc.buttonMode = true;
 			
 			timelineClip.addEventListener(MouseEvent.MOUSE_DOWN, dragTimeline);
 			timelineClip.addEventListener(MouseEvent.MOUSE_UP, dropTimeline);
@@ -1385,41 +1392,49 @@
 			
 			// barra toggles
 			person_mc.buttonMode = true;
+			person_mc.mouseChildren = false;
 			person_mc.hitArea = person_mc.hit_mc;
 			person_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			person_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			person_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			technology_mc.buttonMode = true;
+			technology_mc.mouseChildren = false;
 			technology_mc.hitArea = technology_mc.hit_mc;
 			technology_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			technology_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			technology_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			business_mc.buttonMode = true;
+			business_mc.mouseChildren = false;
 			business_mc.hitArea = business_mc.hit_mc;
 			business_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			business_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			business_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			console_mc.buttonMode = true;
+			console_mc.mouseChildren = false;
 			console_mc.hitArea = console_mc.hit_mc;
 			console_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			console_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			console_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			controller_mc.buttonMode = true;
+			controller_mc.mouseChildren = false;
 			controller_mc.hitArea = controller_mc.hit_mc;
 			controller_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			controller_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			controller_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			game_mc.buttonMode = true;
+			game_mc.mouseChildren = false;
 			game_mc.hitArea = game_mc.hit_mc;
 			game_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			game_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			game_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			cultural_mc.buttonMode = true;
+			cultural_mc.mouseChildren = false;
 			cultural_mc.hitArea = cultural_mc.hit_mc;
 			cultural_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			cultural_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			cultural_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			other_mc.buttonMode = true;
+			other_mc.mouseChildren = false;
 			other_mc.hitArea = other_mc.hit_mc;
 			other_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			other_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
@@ -1427,16 +1442,19 @@
 			
 			// botones rayitas
 			related_mc.buttonMode = true;
+			related_mc.mouseChildren = false;
 			related_mc.hitArea = related_mc.hit_mc;
 			related_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			related_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			related_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			predecessor_mc.buttonMode = true;
+			predecessor_mc.mouseChildren = false;
 			predecessor_mc.hitArea = predecessor_mc.hit_mc;
 			predecessor_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			predecessor_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
 			predecessor_mc.addEventListener(MouseEvent.ROLL_OUT, toggleRollOut);
 			inspired_mc.buttonMode = true;
+			inspired_mc.mouseChildren = false;
 			inspired_mc.hitArea = inspired_mc.hit_mc;
 			inspired_mc.addEventListener(MouseEvent.CLICK, toggleClick);
 			inspired_mc.addEventListener(MouseEvent.ROLL_OVER, toggleRollOver);
@@ -1444,11 +1462,13 @@
 			
 			// botones servicios
 			about_mc.buttonMode = true;
+			about_mc.mouseChildren = false;
 			about_mc.hitArea = about_mc.hit_mc;
 			about_mc.addEventListener(MouseEvent.CLICK, aboutClick);
 			about_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
 			about_mc.addEventListener(MouseEvent.ROLL_OUT, buttonRollOut);
 			contact_mc.buttonMode = true;
+			contact_mc.mouseChildren = false;
 			contact_mc.hitArea = contact_mc.hit_mc;
 			contact_mc.addEventListener(MouseEvent.CLICK, contactClick);
 			contact_mc.addEventListener(MouseEvent.ROLL_OVER, buttonRollOver);
@@ -1491,6 +1511,17 @@
 				panTimeline(-1);
 			} else if (code == Keyboard.LEFT) {
 				panTimeline(1);
+			} else if (code == 80) { 
+				// P
+				if (stage.displayState == "normal") {
+					stage.displayState = "fullScreen";
+					setRTFM("fullScreen");
+					hideSearch();
+				} else if (stage.displayState == "fullScreen") {
+					stage.displayState = "normal";
+					setRTFM("normal");
+					showSearch();
+				}
 			} else if (code == 65) { 
 				// A
 				personvisible = !personvisible;
@@ -1631,6 +1662,14 @@
 			}
 		}
 
+		private function setRTFM(mode:String):void {
+			if (mode=="normal") {
+				rtfm_txt.text = "SPACE to view relations A S D F G H J K view/hide event types Q W E view/hide line types MOUSEDRAG/LEFT/RIGHT ARROWS to scroll P for fullscreen";
+			} else if (mode == "fullScreen") {
+				rtfm_txt.text = "SPACE to view relations MOUSEDRAG/LEFT/RIGHT ARROWS to scroll ESCAPE for normal screen";
+			}
+		}
+
 		private function loadEvents():void {
 			setStatus("loading events...");
 			var conn:NetConnection = new NetConnection;
@@ -1701,7 +1740,7 @@
 				}
 				timelineevents.push(o);
 			}
-			minyear--;
+			minyear -= 2;
 			maxyear += 4;
 			timelineepochs = [];
 			timelineepochs.push({
@@ -1718,6 +1757,7 @@
 			setupListeners();
 			// cargar el url que venía deep linked
 			setStatus();
+			setRTFM("normal");
 			if (lastaddress != "/") {
 				processSWFAddress(lastaddress);
 			} else {
@@ -1727,7 +1767,7 @@
 			phrase_txt.visible = false;
 			showSearch();
 		}
-
+		
 		private function onFault(f:Object):void {
 			for each (var node in f) {
 				trace(node);

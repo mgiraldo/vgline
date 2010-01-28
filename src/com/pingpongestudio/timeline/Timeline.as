@@ -1329,14 +1329,14 @@
 			phrase_txt.text = "";
 			randomphrases = [];
 			randomphrases[0] = "loading assets...";
-			randomphrases[1] = "which character was the rabbit in 'sam n max hit the road'?\n\na) sam\nb) max\nc) mad scientist\nd) none of the above";
+			randomphrases[1] = "which character is the rabbit in 'sam n max hit the road'?\n\na) sam\nb) max\nc) mad scientist\nd) none of the above";
 			randomphrases[2] = "'the dig' is the name of a game by which of these?\n\na) lucasarts\nb) activision\nc) midway\nd) none of the above";
 			randomphrases[3] = "which of these was not made by trilobyte?\n\na) the 7th guest\nb) the 11th hour\nc) the 13th floor";
 			randomphrases[4] = "these questions remind you of which game?\n\na) darklands\nb) monkey island\nc) leisure suit larry\nd) wtf?";
 			randomphrases[5] = "loading more assets...";
 			randomphrases[6] = "in what world do you get the first flute in 'super mario bros. 3'?\n\na) 2-1\nb) 3-2\nc) 1-3\nd) 3-1";
 			randomphrases[7] = "which of these was not made by sierra online?\n\na) king's quest\nb) police quest\nc) space quest\nd) dragon's quest";
-			randomphrases[8] = "which was your favorite 'doom' wad?\n\na) star wars\nb) simpsons\nc) aliens\nd) what is a wad?";
+			randomphrases[8] = "which is your favorite 'doom' wad?\n\na) star wars\nb) simpsons\nc) aliens\nd) what is a wad?";
 			randomphrases[9] = "what is the first weapon you find in 'half-life'?\n\na) a stapler\nb) a pistol\nc) a crowbar\nd) a bat";
 			randomphrases = randomphrases.sort(function (a:*,b:*):Number {
 				a;
